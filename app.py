@@ -47,6 +47,10 @@ with st.sidebar:
     
     st.markdown("---")  
     
+    # 🔈 音声読み上げのON/OFFスイッチを設置
+    st.sidebar.subheader("音声設定")
+    tts_enabled = st.sidebar.toggle("AIの返答を音声で読み上げる", value=False)
+    
     # ⏺️ 画面にマイクの録音ボタンを設置
     st.markdown("### 🎤 音声で入力する")
     audio_data = mic_recorder(
@@ -167,6 +171,7 @@ if user_input :
         speech_response.write_to_file(speech_file_path)
         
         # Streamlitの音声再生プレイヤーを表示（autoplay=Trueで自動再生）
-        st.audio(speech_file_path, format="audio/mp3", autoplay=True)
+        if tts_enabled:
+            st.audio(speech_file_path, format="audio/mp3", autoplay=True)
 
     st.session_state.chat_history.append({"role": "assistant", "content": ai_message})
