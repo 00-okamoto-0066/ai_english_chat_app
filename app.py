@@ -29,6 +29,11 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 
+#　🎧 Webアプリ専用の音声データの箱（セッションステート）を初期化する
+if "processed_audio_bytes" not in st.session_state:
+    st.session_state.processed_audio_bytes = None
+    
+    
 def slow_stream(stream):
     """少しゆっくり文字を流すための関数"""
     for chunk in stream:
@@ -113,28 +118,40 @@ user_input = None
 
 # 🎙️ マイクから音声を録音・送信した場合の処理
 if audio_data:
-    with st.spinner("🎧 音声をテキストに変換中..."):
-        audio_bytes = audio_data['bytes']
+    audio_bytes = audio_data.get('bytes')
+    
+    # 🎧 まだ処理していない新しい音声データのときだけ以下の処理をする
+    if audio_bytes and audio_bytes != st.session_state.processed_audio_bytes:
+        # 今回処理する音声を「処理済み」として記憶する
+        st.session_state.processed_audio_bytes = audio_bytes
         
-        # 一時的な音声ファイルとして保存する
-        audio_file_path = "temp_audio.mp3"
-        with open(audio_file_path, "wb") as f:
-            f.write(audio_bytes)
-        
-        # Whisper APIに渡して文字起こしする
-        with open(audio_file_path, "rb") as audio_file:
-            transcript = openai_client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file
-            )
-        
-        # 文字起こしされたテキストを変数に格納
-        user_input = transcript.text
-        
-        # 使い終わった一時ファイルを削除する
-        if os.path.exists(audio_file_path):
-            os.remove(audio_file_path)
-
+        with st.spinner("🎧 音声をテキストに変換中..."):
+            audio_bytes = audio_data['bytes']
+            
+            # 一時的な音声ファイルとして保存する
+            audio_file_path = "temp_audio.mp3"
+            with open(audio_file_path, "wb") as f:
+                f.write(audio_bytes)
+            
+            # Whisper APIに渡して文字起こしする
+            with open(audio_file_path, "rb") as audio_file:
+                transcript = openai_client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file
+                )
+            
+            # 文字起こしされたテキストを変数に格納
+            user_input = transcript.text
+            
+            # 使い終わった一時ファイルを削除する
+            if os.path.exists(audio_file_path):
+                os.remove(audio_file_path)
+                
+            # メモリ上のマイク入力データもここで消去
+            if "mic_input" in st.session_state:
+                del st.session_state["mic_input"]
+            
+ 
 # ⌨️ キーボード入力した内容を受け取り処理
 text_input = st.chat_input("英語でメッセージを入力、または上のマイクを使ってみよう！")
 if text_input:
@@ -159,6 +176,7 @@ if user_input :
         ) as stream:
             ai_message = st.write_stream(slow_stream(stream.text_stream))
 
+
 # 🔊 返答テキストを音声（mp3）に変換して自動再生する
     if ai_message:
         # OpenAIのTTSで音声を生成
@@ -177,3 +195,7 @@ if user_input :
             st.audio(speech_file_path, format="audio/mp3", autoplay=True)
 
     st.session_state.chat_history.append({"role": "assistant", "content": ai_message})
+    
+    # 💡 【追加】使い終わったAIの音声一時ファイルを削除する
+    if os.path.exists("temp_response.mp3"):
+        os.remove("temp_response.mp3")
