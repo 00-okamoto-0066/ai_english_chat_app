@@ -65,8 +65,10 @@ with st.sidebar:
     st.markdown("### 🗑️ 会話履歴を削除する")
     if st.button("🗑️ 会話履歴をリセット"):
         st.session_state.chat_history = []
-        st.toast("🗑️ 会話履歴をリセットしました！", icon="✨")
+        if "mic_input" in st.session_state:
+            del st.session_state["mic_input"]
         time.sleep(0.5)
+        st.toast("🗑️ 会話履歴をリセットしました！", icon="✨")
         st.rerun()
         
     st.markdown("---")
