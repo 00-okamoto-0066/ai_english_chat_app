@@ -15,7 +15,9 @@ Streamlit、Claude、OpenAI APIを組み合わせて構築した、
 - **Language:** Python
 - **APIs:** Anthropic API (Claude), OpenAI API (Whisper / TTS)
 
-## 🔗 アプリのURL
-実際のアプリケーションはこちらからお試しいただけます：
 
-👉 https://aienglishchatapp-2hq9kpo9vjdmdzhsrzbk7s.streamlit.app/
+## 🚀 公開アプリ・デモ動画
+実際にアプリを操作しながら、主な機能（キャラクター選択・音声入出力・会話履歴のダウンロードなど）を説明しているデモ動画と、公開中のWebアプリです。（動画再生時間：約1分）
+
+* 🤖 **[実際にチャットボットを動かす](https://aienglishchatapp-2hq9kpo9vjdmdzhsrzbk7s.streamlit.app/)**
+* 🎥 **[デモ動画を視聴する（YouTube）](https://youtu.be/DUFm_RDGW6o)**
